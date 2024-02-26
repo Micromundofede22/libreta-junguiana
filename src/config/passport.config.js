@@ -5,14 +5,21 @@ import {
   synchronicitiesService, 
   usersService 
 } from "../service/service.js";
-import { createHash } from "../utils.js";
+import { createHash, extractCookie, generateToken, isValidPassword } from "../utils.js";
+import passport_jwt from "passport-jwt";
 
-const LocalEstrategy = local.Strategy;
+
+const LocalStrategy = local.Strategy;
+const JWTStrategy= passport_jwt.Strategy;
+const ExtractJWT = passport_jwt.ExtractJwt;
+
+
 
 const initializePassport = () => {
+//REGISTER
   passport.use(
     "registerPassport",
-    new LocalEstrategy(
+    new LocalStrategy(
       {
         passReqToCallback: true,
         usernameField: "email",
@@ -36,8 +43,7 @@ const initializePassport = () => {
 
           const dreams = await dreamsService.create({});
           const synchronicities = await synchronicitiesService.create({});
-          // console.log(first_name, last_name, email, age, sex, role, psychologist,password, dreams._id, synchronicities._id)
-          // console.log(createHash(password))
+          
           const newUser = {
             first_name,
             last_name,
@@ -55,7 +61,6 @@ const initializePassport = () => {
             imageProfile: "user.jpg",
           };
 
-          console.log(newUser)
           const result = await usersService.create(newUser);
           return done(null, result);
         } catch (error) {}
@@ -63,10 +68,46 @@ const initializePassport = () => {
     )
   );
 
+  //LOGIN
+  passport.use(
+    "loginPassport",
+    new LocalStrategy(
+      {
+        usernameField: "email",
+      },
+      async (username, password, done) => {
+
+        const user= await usersService.getOne({email: username});
+        if(!user) return done(null,false)
+        if(!isValidPassword(user,password)) return done(null,false);
+
+        const token= generateToken(user);
+        user.token= token;
+        done(null,user);
+
+      }
+    )
+  );
+
+  //JWT
+  passport.use("jwt",
+  new JWTStrategy(
+    {
+      jwtFromRequest: ExtractJWT.fromExtractors([extractCookie]), //extrae la cookie
+      secretOrKey: "secret_JWT", 
+    },
+    async (jwt_payload, done) => {
+      // console.log("jwt_payload:", jwt_payload);
+      done(null, jwt_payload); //devuelve contenido del jwt
+    }
+  ))
+
+
+  //SERIALIZE
   passport.serializeUser((user, done) => {
     done(null, user._id);
   });
-
+//DESERIALIZE
   passport.deserializeUser(async (id, done) => {
     const user = await usersService.getById(id)
     done(null, user);

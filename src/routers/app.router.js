@@ -65,8 +65,11 @@ export default class AppRouter{
             res.status(400).json({ status: 'error', error: error })
 
         res.unauthorized = (error) =>
-            res.status(401).json({ status: "error", error: error });
-
+            res.status(401).json({ status: "error", error: error }); //autenticación falló
+        
+        res.forbidden = (error)=> 
+            res.status(403).json({status: "error", error: error}) //autenticado pero prohibido pero sin permisos
+            
         res.sendRequestError = (error) =>
             res.status(404).json({ status: "error", error: error });
 

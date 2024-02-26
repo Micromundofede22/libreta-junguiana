@@ -1,3 +1,5 @@
+
+
 export const register = (req, res) => {
   try {
     res.sendSuccess("Usuario registrado");
@@ -16,3 +18,33 @@ export const failRegister = (req, res) => {
     res.sendServerError(error.message);
   }
 };
+
+//LOGIN
+export const login = (req, res) => {
+  try {
+    res
+    .cookie("cookie_name_jwt", req.user.token, {signed: true})
+    .sendSuccess("Usuario logueado");
+  } catch (error) {
+    res.sendServerError(error.message);
+  };
+};
+
+export const failLogin = (req, res) => {
+  try {
+    res.unauthorized(`Error al loguearse. Si se registró y aún no verificó su cuenta de email, 
+    revise su correo y confirme con el link que se le envió. Caso contrario vuelva a loguearse`);
+  } catch (error) {
+    res.sendServerError(error.message);
+  };
+};
+
+
+export const logout= (req,res) => {
+  try {
+    req.session.destroy((err) => {}); //destruyo la session que usa passport
+    res.clearCookie("cookie_name_jwt"); //limpio la cookie que tiene el token
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
+}
