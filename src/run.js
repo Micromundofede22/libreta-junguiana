@@ -8,8 +8,8 @@ const run= (app) => {
     const dreamsRouter= new DreamsRouter();
 
     //seteo routes
-    app.use("api/session", sessionRouter.getRouter());
-    app.use("api/dreams", dreamsRouter.getRouter());
+    app.use("/api/session", sessionRouter.getRouter());
+    app.use("/api/dreams", dreamsRouter.getRouter());
 
 }
 

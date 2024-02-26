@@ -12,10 +12,6 @@ const synchronicitiesSchema = new mongoose.Schema({
             //esperanza - tristeza - divertido - miedo - confuso
              type: String, 
              required: false },
-        memory: {
-            // vívido - muy bueno - bueno - malo
-             type: String, 
-             required: true },
         date: {
           // 01 - 31
           type: Number,
