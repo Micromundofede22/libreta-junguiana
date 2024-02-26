@@ -16,17 +16,17 @@ const dreamSchema = new mongoose.Schema({
             // vívido - muy bueno - bueno - malo
              type: String, 
              required: true },
-             date: {
+        date: {
               // 01 - 31
               type: Number,
               maxlength: 2,
             },
-            month: {
+        month: {
               // 00 - 11
               type: Number,
               maxlength: 2,
             },
-            year: {
+        year: {
               // 2022
               type: Number,
               maxlength: 4,

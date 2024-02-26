@@ -3,8 +3,8 @@ import {
   deleteSynchro,
   getSynchro,
   updateSynchro,
-} from "../controllers/synchronicities.controller";
-import AppRouter from "./app.router";
+} from "../controllers/synchronicities.controller.js";
+import AppRouter from "./app.router.js";
 
 export default class SynchronicitiesRouter extends AppRouter {
   init() {

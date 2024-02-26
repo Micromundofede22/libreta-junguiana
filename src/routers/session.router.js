@@ -33,7 +33,5 @@ export default class SessionRouter extends AppRouter{
         //LOGOUT
         this.get("/logout", passportCall("jwt") , logout);  //arreglar !!!!!!!!!!!!!!!!!!!!
 
-        
-
     }
 }
