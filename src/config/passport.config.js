@@ -7,6 +7,7 @@ import {
 } from "../service/service.js";
 import { createHash, extractCookie, generateToken, isValidPassword } from "../utils.js";
 import passport_jwt from "passport-jwt";
+import { JWT_PRIVATE_KEY } from "./config.js";
 
 
 const LocalStrategy = local.Strategy;
@@ -94,7 +95,7 @@ const initializePassport = () => {
   new JWTStrategy(
     {
       jwtFromRequest: ExtractJWT.fromExtractors([extractCookie]), //extrae la cookie
-      secretOrKey: "secret_JWT",
+      secretOrKey: JWT_PRIVATE_KEY,
     },
     async (jwt_payload, done) => {
       // console.log("jwt_payload:", jwt_payload);

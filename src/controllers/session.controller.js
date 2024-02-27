@@ -1,3 +1,4 @@
+import { SIGNED_COOKIE_NAME } from "../config/config";
 
 
 export const register = (req, res) => {
@@ -23,7 +24,7 @@ export const failRegister = (req, res) => {
 export const login = (req, res) => {
   try {
     res
-    .cookie("cookie_name_jwt", req.user.token, {signed: false})
+    .cookie(SIGNED_COOKIE_NAME, req.user.token, {signed: false})
     .sendSuccess("Usuario logueado");
   } catch (error) {
     res.sendServerError(error.message);
