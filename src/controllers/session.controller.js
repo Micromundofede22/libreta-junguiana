@@ -1,4 +1,4 @@
-import { SIGNED_COOKIE_NAME } from "../config/config";
+import { SIGNED_COOKIE_NAME } from "../config/config.js";
 
 
 export const register = (req, res) => {

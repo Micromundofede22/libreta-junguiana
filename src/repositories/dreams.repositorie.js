@@ -5,6 +5,7 @@ export default class DreamsRepositorie{
     create= async(data) => await this.dao.create(data); 
     get= async() => await this.dao.get(); 
     getById= async(id) => await this.dao.getById(id); 
+    getOne= async(data) => await this.dao.getOne(data); 
     update= async(id,data) => await this.dao.update(id,data);
     delete= async(id)=> await this.dao.delete(id);
 };

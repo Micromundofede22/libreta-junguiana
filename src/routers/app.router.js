@@ -56,19 +56,22 @@ export default class AppRouter{
     generateCustomResponses = (req, res, next) => {
         //respuestas predeterminadas en su estructura, luego solo le paso el contenido
         res.sendSuccess = payload =>
-            res.status(200).json({ status: 'success', payload: payload })
+            res.status(200).json({ status: 'success', payload: payload });
 
         res.createdSuccess = (payload) =>
             res.status(201).json({ status: "success", payload: payload });
 
+        res.notContent = (payload) =>
+            res.status(204).json({status: "success", payload: payload});
+
         res.sendError = error =>
-            res.status(400).json({ status: 'error', error: error })
+            res.status(400).json({ status: 'error', error: error });
 
         res.unauthorized = (error) =>
             res.status(401).json({ status: "error", error: error }); //autenticación falló
         
         res.forbidden = (error)=> 
-            res.status(403).json({status: "error", error: error}) //autenticado pero prohibido pero sin permisos
+            res.status(403).json({status: "error", error: error}); //autenticado pero prohibido pero sin permisos
             
         res.sendRequestError = (error) =>
             res.status(404).json({ status: "error", error: error });
@@ -76,8 +79,8 @@ export default class AppRouter{
         res.sendServerError = (error) =>
             res.status(500).json({ status: "error", error: error });
 
-        next()
+        next();
     }
 
 
-}
+};
