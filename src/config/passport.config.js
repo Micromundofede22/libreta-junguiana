@@ -1,6 +1,7 @@
 import passport from "passport";
 import local from "passport-local";
 import { 
+  diaryService,
   dreamsService, 
   synchronicitiesService, 
   usersService 
@@ -33,37 +34,60 @@ const initializePassport = () => {
             return done("Datos incompletos", false);
           }
 
-          if (role == "user") {
-            if (!psychologist) return done("Datos incompletos");
-          }
           const user = await usersService.getOne({ email: username });
           if (user) {
             console.log("Usuario ya registrado");
             return done(null, false);
           }
 
-          const dreams = await dreamsService.create({});
-          const synchronicities = await synchronicitiesService.create({});
-          
-          const newUser = {
+          if(role === "psychologist"){
+            const diary= await diaryService.create({});
+
+            const newUser= {
             first_name,
             last_name,
             email,
             age,
             sex,
             password: createHash(password),
-            role,
-            psychologist,
-            dreams: dreams._id,
-            synchronicities: synchronicities._id,
+            role,    
+            diary: diary._id,
             verifiedAccount: "UNVERIFIED",
             status: "inactive",
             service: "local",
-            imageProfile: "user.jpg",
+            imageProfile: "psico.jpg",
+            };
+            const result = await usersService.create(newUser);
+            return done(null, result);
           };
 
-          const result = await usersService.create(newUser);
-          return done(null, result);
+          if (role === "user") {
+            if (!psychologist) return done("Datos incompletos");
+
+            const dreams = await dreamsService.create({});
+            const synchronicities = await synchronicitiesService.create({});
+
+            const newUser = {
+              first_name,
+              last_name,
+              email,
+              age,
+              sex,
+              password: createHash(password),
+              role,
+              psychologist,
+              dreams: dreams._id,
+              synchronicities: synchronicities._id,
+              verifiedAccount: "UNVERIFIED",
+              status: "inactive",
+              service: "local",
+              imageProfile: "user.jpg",
+            };
+  
+            const result = await usersService.create(newUser);
+            return done(null, result);
+          }
+          
         } catch (error) {}
       }
     )

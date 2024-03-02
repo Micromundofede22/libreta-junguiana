@@ -1,10 +1,10 @@
-import { dreamsService } from "../service/service.js";
+import { diaryService, dreamsService, usersService } from "../service/service.js";
 
 export const createDream = async (req, res) => {
   try {
     const user = req.user.tokenInfo;
     if (!user) return res.unauthorized("No autorizado. Inicie sesión.");
-    const { title, body, image, interpretation, feelings, memory } = req.body;
+    const { title, body, image, own_interpretation,profesional_interpretation, feelings, memory,date,month,year } = req.body;
     const dreams_Id = user.dreams.toString();
     const dreams = await dreamsService.getById(dreams_Id);
 
@@ -12,9 +12,13 @@ export const createDream = async (req, res) => {
       title,
       body,
       image,
-      interpretation,
+      own_interpretation,
+      profesional_interpretation,
       feelings,
       memory,
+      date,
+      month,
+      year
     };
 
     dreams.dreams.push(dream);
@@ -186,12 +190,33 @@ export const requestInterpretationDream= async(req,res) => {
     try {
         const dream_interpretation_id = req.params.did;
         const user = req.user.tokenInfo;
-        const dreams_id = user.dreams.toString();
-        const dreams= await dreamsService.getById(dreams_id);
-       
+        if (!user) res.unauthorized("No autorizado. Inicie sesión.");
+        const psychologist_email= user.psychologist;
+        if(!psychologist_email) return res.sendRequestError("Seleccione un psicólogo antes de continuar");
+        const psychologist= await usersService.getOne({email:psychologist_email});
+        if(!psychologist) return res.sendRequestError("Seleccione un psicólogo antes de continuar");
+        const psychologist_diary_id= psychologist.diary.toString();
+        const diary = await diaryService.getById(psychologist_diary_id);
 
-        dreams.dreams
+        const patient= diary.diary.find(item=> item.patient.toString() === user._id);
+        // console.log(`patient: ${patient}`);
+
+        if(patient){
+         diary.diary.map(item=>{
+            if(item.patient.toString() == user._id){
+              item.dreams.push(dream_interpretation_id)
+            }
+          })
+          await diaryService.update(psychologist_diary_id, diary);
+        }else{
+            diary.diary.push({
+              patient: user._id,
+              dreams: dream_interpretation_id
+            });
+            await diaryService.update(psychologist_diary_id, diary);
+          }
+        res.sendSuccess("Sueño enviado a su psicólogo, para la interpretación. En 48 hs recibirá respuestas.");
     } catch (error) {
-        
+        res.sendServerError(error.message);
     }
 }

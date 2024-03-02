@@ -4,8 +4,11 @@ import SynchronicitiesRepositorie from "../repositories/synchronicities.reposito
 import SynchronicitiesMongoDao from "../dao/synchronicities.mongo.js";
 import UsersRepositories from "../repositories/users.repositories.js";
 import UsersMongoDao from "../dao/users.mongo.js";
+import DiaryRepositorie from "../repositories/diary.repositorie.js";
+import DiaryMongoDao from "../dao/diary.mongo.js";
 
 
 export const dreamsService= new DreamsRepositorie(new DreamsMongoDAO());
 export const synchronicitiesService= new SynchronicitiesRepositorie(new SynchronicitiesMongoDao());
 export const usersService= new UsersRepositories(new UsersMongoDao());
+export const diaryService= new DiaryRepositorie(new DiaryMongoDao());
