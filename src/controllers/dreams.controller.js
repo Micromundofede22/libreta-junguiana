@@ -204,14 +204,17 @@ export const requestInterpretationDream= async(req,res) => {
         if(patient){
          diary.diary.map(item=>{
             if(item.patient.toString() == user._id){
-              item.dreams.push(dream_interpretation_id)
+              item.dream.push({_id: dream_interpretation_id});
             }
           })
           await diaryService.update(psychologist_diary_id, diary);
         }else{
             diary.diary.push({
               patient: user._id,
-              dreams: dream_interpretation_id
+              dreams_id: user.dreams.toString(),
+              dream:[
+                {_id:dream_interpretation_id}
+              ] 
             });
             await diaryService.update(psychologist_diary_id, diary);
           }
@@ -219,4 +222,39 @@ export const requestInterpretationDream= async(req,res) => {
     } catch (error) {
         res.sendServerError(error.message);
     }
-}
+};
+
+export const interpretationProfesional= async(req,res) =>{
+  try {
+    const patient= req.params.patientId;
+    const dream_id= req.params.did;
+    const data= req.body.profesional_interpretation;
+    const user= req.user.tokenInfo;
+    if (!user) res.unauthorized("No autorizado. Inicie sesión.");
+    const diary_id= user.diary.toString();
+    const diary= await diaryService.getByIdAndPopulate(diary_id);
+    
+    let quantity_interpreted = 0;
+
+    for (const item of diary.diary) {
+      if(item.patient._id.toString() == patient ){
+       for (const dream of item.dreams_id.dreams) {
+        if(dream._id.toString() === dream_id){
+          dream.profesional_interpretation= data;
+          dream.interpreted= true;
+          dream.interpretedBy= `${user.first_name} ${user.last_name}`;
+          quantity_interpreted= quantity_interpreted + 1;
+        };
+        await dreamsService.update(item.patient.dreams.toString(), {dreams: item.dreams_id.dreams});
+       }; 
+      };
+    };
+    if(quantity_interpreted > 0){
+        return res.sendSuccess("Sueño interpretado con éxito");
+      }else{
+        res.sendRequestError("Petición incorrecta");
+      };
+  } catch (error) {
+    res.sendServerError(error.message);
+  };
+};

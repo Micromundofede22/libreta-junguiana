@@ -9,6 +9,8 @@ const dreamSchema = new mongoose.Schema({
         image: { type: String, required: false },
         own_interpretation: { type: String, required: false },
         profesional_interpretation: { type: String, required: false},
+        interpreted:{type:Boolean, default:false},
+        interpretedBy:{type:String, default:""},
         feelings: {
             //esperanza - tristeza - divertido - miedo - confuso
              type: String, 

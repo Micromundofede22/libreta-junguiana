@@ -9,22 +9,26 @@ const diarySchema = new mongoose.Schema({
           type: mongoose.Schema.Types.ObjectId,
           ref: "users",
         },
-        dreams: {
-          type: [
-            {
+        dreams_id: {
               //populate(diary.dreams)
               type: mongoose.Schema.Types.ObjectId,
               ref: "dreams",
               required: false,
-            },
+        },
+        dream:{
+          type:[
+            {_id: String},
+
           ],
-          default:[]
+          _id:false,
+          default: []
         },
         synchronicities: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "synchronicities",
           required: false,
         },
+        _id: false
       },
     ],
     default: [],

@@ -7,12 +7,10 @@ export default class DiaryMongoDao{
     getByIdAndPopulate = async(id) => await diaryModel.findById(id).populate({
         path: "diary.patient",
         select: "first_name last_name email age sex dreams" //llena solo estos campos desde el esquema del modelo patient
+    }).populate({
+        path:"diary.dreams_id",
+        populate: {path: "dreams"},
     });
-    // .populate({
-    //     path:"diary.dreams",
-    //     populate: {path: "dreams"},
-    //     // select: ""
-    // })
-    update = async(id,data) => await diaryModel.findByIdAndUpdate(id,data);
+    update = async(id,data) => await diaryModel.findByIdAndUpdate(id,data,{returnDocument:"after"});
     delete = async(id) => await diaryModel.findByIdAndDelete(id);
 };

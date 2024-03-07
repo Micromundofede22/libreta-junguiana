@@ -6,7 +6,8 @@ import {
     findMemoryDream,
     requestInterpretationDream,
     updateDream,
-    deleteAllDreams 
+    deleteAllDreams, 
+    interpretationProfesional
 } from "../controllers/dreams.controller.js";
 import { handlePolicies } from "../middleware/authorization.js";
 import AppRouter from "./app.router.js";
@@ -16,18 +17,20 @@ export default class DreamsRouter extends AppRouter{
     init(){
         this.post("/", handlePolicies(["USER"]), createDream);
 
-        this.get("/", getAllDreams);
+        this.get("/",handlePolicies(["USER"]), getAllDreams);
 
-        this.get("/:did", getByIdDreams); // did dream id
+        this.get("/:did",handlePolicies(["USER"]), getByIdDreams); // did dream id
 
-        this.post("/search", findMemoryDream);
+        this.post("/search",handlePolicies(["USER"]), findMemoryDream);
         
-        this.put("/:did", updateDream);
+        this.put("/:did",handlePolicies(["USER"]), updateDream);
         
-        this.delete("/:did", deleteDream);
-        
-        this.delete("/", deleteAllDreams);
+        this.delete("/",handlePolicies(["USER"]), deleteAllDreams);
 
-        this.post("/interpretation/:did", requestInterpretationDream);
+        this.delete("/:did",handlePolicies(["USER"]), deleteDream);
+        
+        this.post("/interpretation/:did",handlePolicies(["USER"]), requestInterpretationDream); //enviar peticion de interpretacion
+
+        this.put("/interpretation/:patientId/:did",handlePolicies(["PSYCHOLOGIST"]), interpretationProfesional); // psicologo interpreta
     };
 };
