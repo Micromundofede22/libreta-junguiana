@@ -4,16 +4,17 @@ export const createDream = async (req, res) => {
   try {
     const user = req.user.tokenInfo;
     if (!user) return res.unauthorized("No autorizado. Inicie sesión.");
-    const { title, body, image, own_interpretation,profesional_interpretation, feelings, memory,date,month,year } = req.body;
+    const { title, body, own_interpretation, feelings, memory,date,month,year } = req.body;
+    const image_file= req.file || "";
+    console.log(image_file);
     const dreams_Id = user.dreams.toString();
     const dreams = await dreamsService.getById(dreams_Id);
 
     const dream = {
       title,
       body,
-      image,
+      dream_image: image_file.filename,
       own_interpretation,
-      profesional_interpretation,
       feelings,
       memory,
       date,

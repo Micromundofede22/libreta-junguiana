@@ -3,13 +3,27 @@ import { synchronicitiesService } from "../service/service.js";
 export const createSynchro = async (req, res) => {
   try {
     const user = req.user.tokenInfo;
-    const data = req.body;
+    const {title,body,interpretation,feelings,date,month,year} = req.body;
+    if(!title || !body || !feelings || !date || !month  || !year){
+      return res.sendRequestError("Faltan datos por completar");
+    }
+    const file_image= req.file || "";
     const synchronicities_id = user.synchronicities.toString();
     const synchronicities = await synchronicitiesService.getById(
       synchronicities_id
     );
+
     if (!synchronicities) return res.sendRequestError("Petición incorrecta");
-    synchronicities.synchronicity.push(data);
+    synchronicities.synchronicity.push({
+      title,
+      body,
+      image_synchro: file_image.filename,
+      interpretation,
+      feelings,
+      date,
+      month,
+      year
+      });
     const result = await synchronicitiesService.update(
       synchronicities_id,
       synchronicities

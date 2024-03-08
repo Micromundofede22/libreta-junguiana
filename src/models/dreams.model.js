@@ -6,7 +6,7 @@ const dreamSchema = new mongoose.Schema({
       {
         title: { type: String, required: true },
         body: { type: String, required: true },
-        image: { type: String, required: false },
+        dream_image: { type: String, required: false },
         own_interpretation: { type: String, required: false },
         profesional_interpretation: { type: String, required: false},
         interpreted:{type:Boolean, default:false},

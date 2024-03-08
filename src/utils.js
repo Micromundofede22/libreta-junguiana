@@ -1,5 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import {fileURLToPath} from "url";
+import { dirname } from "path";
 
 export const createHash= (password)=>{
     return bcrypt.hashSync(password, bcrypt.genSaltSync(15));
@@ -17,3 +19,6 @@ export const generateToken= (tokenInfo) => {
 export const extractCookie= (req) =>{
     return (req && req.cookies) ? req.cookies["cookie_name_jwt"] : null;
 };
+
+export const __filename = fileURLToPath(import.meta.url); 
+export const __dirname= dirname(__filename);
