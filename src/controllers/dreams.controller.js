@@ -153,10 +153,11 @@ export const deleteDream = async (req, res) => {
     const dreams_id = user.dreams.toString();
     const dreams = await dreamsService.getById(dreams_id);
 
-    const dream_delete_quantity = 0;
+    let dream_delete_quantity = 0;
 
     for (const [i, item] of dreams.dreams.entries()) {
       if (item._id.toString() === dream_delete_id) {
+        // console.log(i, item)
         dreams.dreams.splice(i, 1);
         dream_delete_quantity = dream_delete_quantity + 1;
       }
