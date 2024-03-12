@@ -55,7 +55,7 @@ const initializePassport = () => {
             verifiedAccount: "UNVERIFIED",
             status: "inactive",
             service: "local",
-            imageProfile: "psico.jpg",
+            imageProfile: "psycho.jpg",
             };
             const result = await usersService.create(newUser);
             return done(null, result);

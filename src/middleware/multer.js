@@ -15,6 +15,9 @@ const storage = multer.diskStorage({
     if(file.fieldname === "curriculum"){
         cb(null, __dirname + "/public/curriculum"); //solicitar al psicólogo
     };
+    if(file.fieldname === "imageProfile"){
+        cb(null, __dirname + "/public/profile"); 
+    };
   },
   filename: function (req, file, cb) {
     cb(null, file.fieldname + "-" + file.originalname);

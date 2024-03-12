@@ -193,10 +193,11 @@ export const requestInterpretationDream= async(req,res) => {
         const dream_interpretation_id = req.params.did;
         const user = req.user.tokenInfo;
         if (!user) res.unauthorized("No autorizado. Inicie sesión.");
+        if(user.status === "inactive") return res.sendRequestError("Active su cuenta enviando sus documentos de identidad.");
         const psychologist_email= user.psychologist;
-        if(!psychologist_email) return res.sendRequestError("Seleccione un psicólogo antes de continuar");
+        if(!psychologist_email) return res.sendRequestError("Seleccione un psicólogo antes de continuar.");
         const psychologist= await usersService.getOne({email:psychologist_email});
-        if(!psychologist) return res.sendRequestError("Seleccione un psicólogo antes de continuar");
+        if(!psychologist) return res.sendRequestError("Seleccione un psicólogo antes de continuar.");
         const psychologist_diary_id= psychologist.diary.toString();
         const diary = await diaryService.getById(psychologist_diary_id);
 
@@ -233,6 +234,7 @@ export const interpretationProfesional= async(req,res) =>{
     const data= req.body.profesional_interpretation;
     const user= req.user.tokenInfo;
     if (!user) res.unauthorized("No autorizado. Inicie sesión.");
+    if(user.status === "inactive") return res.forbidden("Para activar su cuenta como profesional, suba los documentos solicitados.")
     const diary_id= user.diary.toString();
     const diary= await diaryService.getByIdAndPopulate(diary_id);
     
