@@ -1,7 +1,7 @@
 import multer from "multer";
 import { __dirname } from "../utils.js";
 import path from "path";
-import { error } from "console";
+
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -30,7 +30,17 @@ const storage = multer.diskStorage({
 
 export const uploader = multer({
   storage: storage,
+  limits:{fileSize: 1000000}, //máximo 1mb
   fileFilter: function (req, file, cb) {
+
+    //tamaño
+    const fileSize= parseInt(req.headers['content-length']);
+    // console.log(fileSize);
+    if(fileSize  < 1024){
+      return cb (new Error("Archivo posiblemente dañado, cargue archivo con contenido."));
+    };
+
+    //entensión
     if(file.fieldname === "imageProfile"){
       if (path.extname(file.originalname) !== (".png" && ".jpg")) {
         return cb(new Error("Extensión incompatible. Cargue archivo .png o .jpg"));
@@ -43,5 +53,7 @@ export const uploader = multer({
       };
       cb(null, true);
     };
+
+    cb(null,true);
   },
 });

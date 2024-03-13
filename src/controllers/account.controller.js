@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import {
   diaryService,
   dreamsService,
@@ -126,63 +127,100 @@ export const uploaderDocuments = async (req, res) => {
       }
     }
 
-    if (array_documents.length === 2) {
-      await usersService.update(user_id, {
-        status: "active",
-        documents: array_documents,
-      });
-      return res.sendSuccess(
-        "Archivos subidos con éxito. Su cuenta ya se encuentra activa como profesional."
-      );
-    }
+    if (user_db.role === "user") {
+      if (array_documents.length === 1) {
+        await usersService.update(user_id, {
+          status: "active",
+          documents: array_documents,
+        });
+        return res.sendSuccess(
+          "Archivo subido con éxito. Su cuenta ya se encuentra activa para realizar consultas a su psicólogo."
+        );
+      };
+    };
 
-    await usersService.update(user_id, user_db);
-    res.sendSucces("Archivo subido con éxito.");
+    if (user_db.role === "psychologist") {
+      if (array_documents.length === 2) {
+        await usersService.update(user_id, {
+          status: "active",
+          documents: array_documents,
+        });
+        return res.sendSuccess(
+          "Archivos subidos con éxito. Su cuenta ya se encuentra activa como profesional."
+        );
+      };
+      await usersService.update(user_id, user_db);
+      res.sendSucces("Archivo subido con éxito.");
+    };
+
   } catch (error) {
     res.sendServerError(error.message);
   }
 };
 
-export const updateInfo= async (req,res) => {
-    try {
-        const user_id= req.params.uid;
-        const user= req.user.tokenInfo;
-        if(user_id != user._id.toString()) return res.forbidden("Acción prohibida");
-        const data= req.body;
-        const file= req.file;
-        // console.log(file)
-        if(!data) return res.sendRequestError("Petición incorrecta");
-        if(file){
-            await usersService.update(user_id,{imageProfile:file.filename});
-        };
-        const result= await usersService.update(user_id,data);
-        res.
-        sendSuccess(result);
-    } catch (error) {
-        res.sendServerError(error.message);
-    };
+export const updateInfo = async (req, res) => {
+  try {
+    const user_id = req.params.uid;
+    const user = req.user.tokenInfo;
+    if (user_id != user._id.toString())
+      return res.forbidden("Acción prohibida");
+    const data = req.body;
+    const file = req.file;
+    // console.log(file)
+    if (!data) return res.sendRequestError("Petición incorrecta");
+    if (file) {
+      await usersService.update(user_id, { imageProfile: file.filename });
+    }
+    const result = await usersService.update(user_id, data);
+    res.sendSuccess(result);
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
 };
 
-export const deleteUser= async(req,res) => {
-    try {
-        const user_id= req.params.uid;
-        const user= await usersService.getById(user_id);
-        if(!user) return res.sendRequestError("Petición incorrecta");
+export const offlineUser= async(req,res) => {
+  try {
+    const users= await usersService.get();
+    const currentDate= dayjs();
 
-        if(user.role=== "user"){
-            const dreams_id= user.dreams.toString();
-            const synchronicities_id= user.synchronicities.toString();
-            await dreamsService.delete(dreams_id);
-            await synchronicitiesService.delete(synchronicities_id);
-        }
-        if(user.role === "psychologist"){
-            const diary_id= user.diary.toString();
-            await diaryService.delete(diary_id);
-        };
-
-        await usersService.delete(user_id);
-        res.sendSuccess("Usuario eliminado");
-    } catch (error) {
-        res.sendServerError(error.message);
+    let quantity_usersOffline= 0
+    for (const item of users) {
+      const last_conection = dayjs(item.last_conection);
+      const difference= currentDate.diff(last_conection, "month");
+      if(item.status === "active" && difference > 9){
+        item.status = "inactive";
+        quantity_usersOffline= quantity_usersOffline + 1;
+      };
+      await usersService.update(item._id.toString(), item);
     };
+   
+    res.sendSuccess(`Se dieron de baja: ${quantity_usersOffline} usuarios`);
+    
+  } catch (error) {
+    res.sendServerError(error.message);
+  };
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const user_id = req.params.uid;
+    const user = await usersService.getById(user_id);
+    if (!user) return res.sendRequestError("Petición incorrecta");
+
+    if (user.role === "user") {
+      const dreams_id = user.dreams.toString();
+      const synchronicities_id = user.synchronicities.toString();
+      await dreamsService.delete(dreams_id);
+      await synchronicitiesService.delete(synchronicities_id);
+    }
+    if (user.role === "psychologist") {
+      const diary_id = user.diary.toString();
+      await diaryService.delete(diary_id);
+    }
+
+    await usersService.delete(user_id);
+    res.sendSuccess("Usuario eliminado");
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
 };

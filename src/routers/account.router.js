@@ -6,6 +6,7 @@ import {
   createUser,
   uploaderDocuments,
   updateInfo,
+  offlineUser,
   deleteUser,
 } from "../controllers/account.controller.js";
 import { handlePolicies } from "../middleware/authorization.js";
@@ -17,13 +18,12 @@ export default class AccountRouter extends AppRouter {
     this.post("/", handlePolicies(["ADMIN"]), createUser);
     this.put(
       "/uploader-documents",
-      handlePolicies(["USER","PSYCHOLOGIST"]),
+      handlePolicies(["USER", "PSYCHOLOGIST"]),
       uploader.fields([{ name: "dni" }, { name: "curriculum" }]),
       uploaderDocuments
     ); //activar cuenta subiendo archivos
-    this.put("/update-info/:uid",
-     uploader.single("imageProfile"),
-     updateInfo)
+    this.put("/update-info/:uid", uploader.single("imageProfile"), updateInfo);
+    this.put("/users-offline", handlePolicies(["ADMIN"]), offlineUser);
     this.delete("/:uid", handlePolicies(["ADMIN"]), deleteUser);
   }
 }
