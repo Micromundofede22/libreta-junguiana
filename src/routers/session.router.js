@@ -5,7 +5,10 @@ import {
     login, 
     logout, 
     verifyTokenUser,
-    register 
+    register,
+    forgetPassword,
+    verifyToken,
+    resetPassword 
 } from "../controllers/session.controller.js";
 import AppRouter from "./app.router.js";
 import { passportCall } from "../middleware/passportCall.js";
@@ -37,7 +40,13 @@ export default class SessionRouter extends AppRouter{
         //verificación de cuenta
         this.get("/verify-user/:token", verifyTokenUser);
 
-        //restablecer contraseñas
+        //olvidar contraseña
+        this.get("/forget-password", forgetPassword);
 
+        //verificar token previo a restablecer contraseña
+        this.get("/verify-token/:token", verifyToken);
+
+        //restablecer contraseña
+        this.get("/reset-password/:token", resetPassword)
     }
 }

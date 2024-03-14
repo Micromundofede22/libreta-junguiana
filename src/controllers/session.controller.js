@@ -1,5 +1,7 @@
 import { SIGNED_COOKIE_NAME } from "../config/config.js";
+import { sendEmailForgetPassword } from "../service/nodemailer.js";
 import { tokenService, usersService } from "../service/service.js";
+import { createHash, generateRandomString, isValidPassword } from "../utils.js";
 
 
 export const register = (req, res) => {
@@ -60,13 +62,61 @@ export const verifyTokenUser= async(req,res) => {
       const emailToken= tokenDB.email;
 
       const user= await usersService.getOne({email:emailToken});
-
+      if(user.verifiedAccount === "VERIFIED") return res.sendRequestError("Su cuenta ya está verificada");
       if(user){
         await usersService.update(user._id, { verifiedAccount: "VERIFIED" });
         await tokenService.delete({email:emailToken});
         // return res.render("sessions/userVerified", { userVerified });
         return res.sendSuccess("Cuenta verificada, ya puede iniciar sesión.");
       };
+  } catch (error) {
+    res.sendServerError(error.message);
+  };
+};
+
+export const forgetPassword= async(req,res) => {
+  try {
+    const email= req.body.email;
+    const user= await usersService.getOne({email:email});
+    if(!user) return res.sendRequestError("Petición incorrecta");
+    const token= generateRandomString(15);
+    await tokenService.create({
+      email:email,
+      token:token
+    });
+    sendEmailForgetPassword(email,token);
+    res.sendSuccess(`Hemos enviado un email a su casilla ${email}. Ingrese allí para restablecer su contraseña.`);
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
+};
+
+export const verifyToken= async(req,res) => {
+  try {
+    const token= req.params.token;
+    const tokenDB= await tokenService.getOne({token:token});
+    if(!tokenDB) return res.sendRequestError("Petición incorrecta");
+    res.sendSuccess("Token verificado, ya puede restablecer su contraseña"); 
+    //redirigir a vista para colocar nueva contraseña, y enviar el email por params
+
+  } catch (error) {
+    res.sendServerError(error.message);
+  };
+};
+
+export const resetPassword= async(req,res) => {
+  try {
+    const token= req.params.token;
+    const newPassword = req.body.password;
+    const tokenDB= await tokenService.getOne({token: token});
+
+    const user= await usersService.getOne({email: tokenDB.email});
+
+    if(isValidPassword(user, newPassword)) return res.sendRequestError("Debe colocar otra contraseña");
+    user.password= createHash(newPassword);
+    await usersService.update(user._id.toString(), user);
+    await tokenService.delete({token:token});
+    res.sendSuccess("Contraseña cambiada con éxito");
   } catch (error) {
     res.sendServerError(error.message);
   };
