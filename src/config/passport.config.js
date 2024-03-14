@@ -4,11 +4,13 @@ import {
   diaryService,
   dreamsService, 
   synchronicitiesService, 
+  tokenService, 
   usersService 
 } from "../service/service.js";
-import { createHash, extractCookie, generateToken, isValidPassword } from "../utils.js";
+import { createHash, extractCookie, generateRandomString, generateToken, isValidPassword } from "../utils.js";
 import passport_jwt from "passport-jwt";
 import { JWT_PRIVATE_KEY } from "./config.js";
+import { sendEmailValidation } from "../service/nodemailer.js";
 
 
 const LocalStrategy = local.Strategy;
@@ -40,6 +42,12 @@ const initializePassport = () => {
             return done(null, false);
           }
 
+          const token= generateRandomString(10);
+          await tokenService.create({
+            token:token,
+            email: email
+          });
+
           if(role === "psychologist"){
             const diary= await diaryService.create({});
 
@@ -58,6 +66,7 @@ const initializePassport = () => {
             imageProfile: "psycho.jpg",
             };
             const result = await usersService.create(newUser);
+            sendEmailValidation(token, email, first_name);
             return done(null, result);
           };
 
@@ -85,6 +94,7 @@ const initializePassport = () => {
             };
   
             const result = await usersService.create(newUser);
+            sendEmailValidation(token, email, first_name);
             return done(null, result);
           }
           

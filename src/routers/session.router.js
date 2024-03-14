@@ -4,6 +4,7 @@ import {
     failRegister, 
     login, 
     logout, 
+    verifyTokenUser,
     register 
 } from "../controllers/session.controller.js";
 import AppRouter from "./app.router.js";
@@ -32,6 +33,11 @@ export default class SessionRouter extends AppRouter{
 
         //LOGOUT
         this.get("/logout", passportCall("jwt") , logout);  //arreglar !!!!!!!!!!!!!!!!!!!!
+
+        //verificación de cuenta
+        this.get("/verify-user/:token", verifyTokenUser);
+
+        //restablecer contraseñas
 
     }
 }

@@ -1,4 +1,5 @@
 import { SIGNED_COOKIE_NAME } from "../config/config.js";
+import { tokenService, usersService } from "../service/service.js";
 
 
 export const register = (req, res) => {
@@ -48,4 +49,25 @@ export const logout= (req,res) => {
   } catch (error) {
     res.sendServerError(error.message);
   }
-}
+};
+
+export const verifyTokenUser= async(req,res) => {
+  try {
+    const token= req.params.token;
+    const tokenDB= await tokenService.getOne({token: token});
+      if (!tokenDB) return res.sendRequestError("Token no válido");
+
+      const emailToken= tokenDB.email;
+
+      const user= await usersService.getOne({email:emailToken});
+
+      if(user){
+        await usersService.update(user._id, { verifiedAccount: "VERIFIED" });
+        await tokenService.delete({email:emailToken});
+        // return res.render("sessions/userVerified", { userVerified });
+        return res.sendSuccess("Cuenta verificada, ya puede iniciar sesión.");
+      };
+  } catch (error) {
+    res.sendServerError(error.message);
+  };
+};

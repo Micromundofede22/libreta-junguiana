@@ -35,12 +35,13 @@ export const uploader = multer({
 
     //tamaño
     const fileSize= parseInt(req.headers['content-length']);
+    // console.log(req.headers);
     // console.log(fileSize);
     if(fileSize  < 1024){
       return cb (new Error("Archivo posiblemente dañado, cargue archivo con contenido."));
     };
 
-    //entensión
+    //extensión
     if(file.fieldname === "imageProfile"){
       if (path.extname(file.originalname) !== (".png" && ".jpg")) {
         return cb(new Error("Extensión incompatible. Cargue archivo .png o .jpg"));

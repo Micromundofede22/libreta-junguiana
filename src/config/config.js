@@ -15,3 +15,6 @@ export const SIGNED_COOKIE_NAME= process.env.SIGNED_COOKIE_NAME;
 
 export const SIGNED_COOKIE_SECRET= process.env.SIGNED_COOKIE_SECRET;
 
+export const NODEMAILER_USER= process.env.NODEMAILER_USER;
+
+export const NODEMAILER_PASS= process.env.NODEMAILER_PASS;
