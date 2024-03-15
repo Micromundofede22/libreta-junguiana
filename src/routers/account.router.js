@@ -6,6 +6,7 @@ import {
   createUser,
   uploaderDocuments,
   updateInfo,
+  changeRole,
   offlineUser,
   deleteUser,
 } from "../controllers/account.controller.js";
@@ -22,7 +23,18 @@ export default class AccountRouter extends AppRouter {
       uploader.fields([{ name: "dni" }, { name: "curriculum" }]),
       uploaderDocuments
     ); //activar cuenta subiendo archivos
-    this.put("/update-info/:uid", uploader.single("imageProfile"), updateInfo);
+    this.put(
+      "/update-info/:uid",
+      uploader.single("imageProfile"),
+      handlePolicies(["USER", "PSYCHOLOGIST"]),
+      updateInfo
+    );
+    this.put(
+      "/role-change/:uid",
+      uploader.single("dni"),
+      handlePolicies(["USER","PREMIUM"]),
+      changeRole
+    );
     this.put("/users-offline", handlePolicies(["ADMIN"]), offlineUser);
     this.delete("/:uid", handlePolicies(["ADMIN"]), deleteUser);
   }

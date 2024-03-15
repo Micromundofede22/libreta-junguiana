@@ -5,7 +5,8 @@ import {
   synchronicitiesService,
   usersService,
 } from "../service/service.js";
-import { createHash } from "../utils.js";
+import { createHash, generateToken } from "../utils.js";
+import { SIGNED_COOKIE_NAME } from "../config/config.js";
 
 export const getAllUser = async (req, res) => {
   try {
@@ -136,8 +137,8 @@ export const uploaderDocuments = async (req, res) => {
         return res.sendSuccess(
           "Archivo subido con éxito. Su cuenta ya se encuentra activa para realizar consultas a su psicólogo."
         );
-      };
-    };
+      }
+    }
 
     if (user_db.role === "psychologist") {
       if (array_documents.length === 2) {
@@ -148,11 +149,10 @@ export const uploaderDocuments = async (req, res) => {
         return res.sendSuccess(
           "Archivos subidos con éxito. Su cuenta ya se encuentra activa como profesional."
         );
-      };
+      }
       await usersService.update(user_id, user_db);
       res.sendSucces("Archivo subido con éxito.");
-    };
-
+    }
   } catch (error) {
     res.sendServerError(error.message);
   }
@@ -178,27 +178,80 @@ export const updateInfo = async (req, res) => {
   }
 };
 
-export const offlineUser= async(req,res) => {
+export const changeRole = async (req, res) => {
   try {
-    const users= await usersService.get();
-    const currentDate= dayjs();
+    const user_id = req.params.uid;
+    const newRole = req.body.role;
+    const dni = req.file;
+    const user = await usersService.getById(user_id);
+    if (!user) return res.sendRequestError("Petición incorrecta");
+    // console.log(user.documents, typeof user.documents, typeof user.documents === typeof new Array );
 
-    let quantity_usersOffline= 0
-    for (const item of users) {
-      const last_conection = dayjs(item.last_conection);
-      const difference= currentDate.diff(last_conection, "month");
-      if(item.status === "active" && difference > 9){
-        item.status = "inactive";
-        quantity_usersOffline= quantity_usersOffline + 1;
-      };
-      await usersService.update(item._id.toString(), item);
+    if (newRole === "premium") {
+      if(user.role === "premium") return res.sendRequestError(`Usted ya es ${user.role}`);
+      if (user.documents.length === 0) {
+        if (!dni)
+          return res.sendRequestError(
+            "Suba el documento dni para realizar este cambio."
+          );
+        user.documents.push({
+          name: dni?.filename,
+          reference: dni?.path,
+        });
+        user.role = "premium";
+      }
+      if (user.documents.length > 0) {
+        user.role = "premium";
+      }
+      await usersService.update(user_id, user);
+      req.user.tokenInfo.role = "premium";
+      req.user.tokenInfo.documents = user.documents;
+
+      const userCurrent = req.user.tokenInfo;
+      const token = generateToken(userCurrent);
+      return res
+        .cookie(SIGNED_COOKIE_NAME, token, { signed: false })
+        .sendSuccess(
+          `Rol cambiado a ${userCurrent.role} exitosamente. Disfrute los beneficion de ser ${userCurrent.role}`
+        );
     };
-   
-    res.sendSuccess(`Se dieron de baja: ${quantity_usersOffline} usuarios`);
-    
+
+    if(newRole === "user"){
+      if(user.role === "user") return res.sendRequestError(`Usted ya es ${user.role}`);
+      user.role= "user";
+      await usersService.update(user_id,user);
+      req.user.tokenInfo.role= "user";
+      const userCurrent=  req.user.tokenInfo;
+      const token= generateToken(userCurrent);
+      return res
+      .cookie(SIGNED_COOKIE_NAME,token,{signed:false})
+      .sendSuccess(`Rol cambiado a ${userCurrent.role} exitosamente. Tenga en cuenta que no contará con los beneficios de user PREMIUM`)
+    };
   } catch (error) {
     res.sendServerError(error.message);
   };
+};
+
+export const offlineUser = async (req, res) => {
+  try {
+    const users = await usersService.get();
+    const currentDate = dayjs();
+
+    let quantity_usersOffline = 0;
+    for (const item of users) {
+      const last_conection = dayjs(item.last_conection);
+      const difference = currentDate.diff(last_conection, "month");
+      if (item.status === "active" && difference > 9) {
+        item.status = "inactive";
+        quantity_usersOffline = quantity_usersOffline + 1;
+      }
+      await usersService.update(item._id.toString(), item);
+    }
+
+    res.sendSuccess(`Se dieron de baja: ${quantity_usersOffline} usuarios`);
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
 };
 
 export const deleteUser = async (req, res) => {
