@@ -4,7 +4,11 @@ const usersSchema = new mongoose.Schema({
   first_name: { type: String, required: true },
   last_name: { type: String, required: true },
   email: { type: String, required: true },
-  age: { type: Number, required: true },
+  age: [{ 
+    type: Number, 
+    required: true, 
+    min:[18, "Usted es menor de edad. Mínimo 18, usted tiene {VALUE}"], //value es reemplazado por el valor incorecto
+    max:99}],
   sex: { type: String, required: true },
   role: {
     type: String,
@@ -16,7 +20,16 @@ const usersSchema = new mongoose.Schema({
   dreams: {type: mongoose.Schema.Types.ObjectId, ref: "dreams",required:false},
   synchronicities: {type: mongoose.Schema.Types.ObjectId, ref: "synchronicities",required:false},
   diary: {type:mongoose.Schema.Types.ObjectId, ref:"diary", required:false},
-  password: { type: String, required: true },
+  // password: [{ //minimos y maximos en cadenas
+  //   type: String, 
+  //   required: true, 
+  //   minLength: [8, "Contraseña muy corta, mínimo 8 caracteres"],
+  //   maxLength: [40, "Contraseña demasiado extensa, máximo 30 caracteres"]
+  // }],
+  password:{ 
+    type: String, 
+    required: true
+  },
   verifiedAccount: { type: String, default: "UNVERIFIED" },
   status: { type: String, default: "inactive" },
   service: {type: String, required: true},
@@ -32,6 +45,8 @@ const usersSchema = new mongoose.Schema({
     default: [],
   },
 });
+
+
 
 mongoose.set("strictQuery", false);
 

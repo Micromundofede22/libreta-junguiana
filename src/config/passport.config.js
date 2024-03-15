@@ -35,6 +35,7 @@ const initializePassport = () => {
           if (!first_name || !last_name || !email || !age || !sex || !role ) {
             return done("Datos incompletos", false);
           }
+          
 
           const user = await usersService.getOne({ email: username });
           if (user) {
@@ -92,13 +93,16 @@ const initializePassport = () => {
               service: "local",
               imageProfile: "user.jpg",
             };
-  
+            
             const result = await usersService.create(newUser);
+
             sendEmailValidation(token, email, first_name);
             return done(null, result);
           }
           
-        } catch (error) {}
+        } catch (error) {
+        return done(error.message, false);
+        }
       }
     )
   );
