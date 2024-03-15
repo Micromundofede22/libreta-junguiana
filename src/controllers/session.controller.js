@@ -1,4 +1,4 @@
-import { SIGNED_COOKIE_NAME } from "../config/config.js";
+import { SIGNED_COOKIE_NAME} from "../config/config.js";
 import { sendEmailForgetPassword } from "../service/nodemailer.js";
 import { tokenService, usersService } from "../service/service.js";
 import { createHash, generateRandomString, isValidPassword } from "../utils.js";
@@ -47,7 +47,9 @@ export const failLogin = (req, res) => {
 export const logout= (req,res) => {
   try {
     req.session.destroy((err) => {}); //destruyo la session que usa passport
-    res.clearCookie("cookie_name_jwt"); //limpio la cookie que tiene el token
+    res
+    .clearCookie(SIGNED_COOKIE_NAME)
+    .sendSuccess("Logout"); //redirect("/login")
   } catch (error) {
     res.sendServerError(error.message);
   }

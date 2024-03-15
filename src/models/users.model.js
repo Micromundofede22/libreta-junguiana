@@ -20,7 +20,7 @@ const usersSchema = new mongoose.Schema({
   dreams: {type: mongoose.Schema.Types.ObjectId, ref: "dreams",required:false},
   synchronicities: {type: mongoose.Schema.Types.ObjectId, ref: "synchronicities",required:false},
   diary: {type:mongoose.Schema.Types.ObjectId, ref:"diary", required:false},
-  // password: [{ //minimos y maximos en cadenas
+  // password: [{ //minimos y maximos en cadenas, aca no ocupo porque password es un token larguisimo
   //   type: String, 
   //   required: true, 
   //   minLength: [8, "Contraseña muy corta, mínimo 8 caracteres"],

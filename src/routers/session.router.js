@@ -47,6 +47,6 @@ export default class SessionRouter extends AppRouter{
         this.get("/verify-token/:token", verifyToken);
 
         //restablecer contraseña
-        this.get("/reset-password/:token", resetPassword)
-    }
-}
+        this.get("/reset-password/:token", resetPassword);
+    };
+};
