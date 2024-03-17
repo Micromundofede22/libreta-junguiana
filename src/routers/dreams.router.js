@@ -16,27 +16,27 @@ import AppRouter from "./app.router.js";
 export default class DreamsRouter extends AppRouter {
   init() {
     this.post("/", 
-    handlePolicies(["USER"]), 
+    handlePolicies(["USER","PREMIUM"]), 
     uploader.single("dream_image"),
     createDream);
 
-    this.get("/", handlePolicies(["USER"]), getAllDreams);
+    this.get("/", handlePolicies(["USER","PREMIUM"]), getAllDreams);
 
-    this.get("/:did", handlePolicies(["USER"]), getByIdDreams); // did dream id
+    this.get("/:did", handlePolicies(["USER","PREMIUM"]), getByIdDreams); // did dream id
 
-    this.post("/search", handlePolicies(["USER"]), findMemoryDream);
+    this.post("/search", handlePolicies(["USER","PREMIUM"]), findMemoryDream);
 
-    this.put("/:did", handlePolicies(["USER"]), updateDream);
+    this.put("/:did", handlePolicies(["USER","PREMIUM"]), updateDream);
 
-    this.delete("/", handlePolicies(["USER"]), deleteAllDreams);
+    this.delete("/", handlePolicies(["USER","PREMIUM"]), deleteAllDreams);
 
-    this.delete("/:did", handlePolicies(["USER"]), deleteDream);
+    this.delete("/:did", handlePolicies(["USER","PREMIUM"]), deleteDream);
 
     this.post(
       "/interpretation/:did",
-      handlePolicies(["USER"]),
+      handlePolicies(["USER","PREMIUM"]),
       requestInterpretationDream
-    ); //enviar peticion de interpretacion
+    ); //enviar peticion de interpretacion. USER= 1 INTERPRETACION DE PRUEBA
 
     this.put(
       "/interpretation/:patientId/:did",

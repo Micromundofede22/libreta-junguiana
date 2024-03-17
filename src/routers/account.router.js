@@ -19,14 +19,14 @@ export default class AccountRouter extends AppRouter {
     this.post("/", handlePolicies(["ADMIN"]), createUser);
     this.put(
       "/uploader-documents",
-      handlePolicies(["USER", "PSYCHOLOGIST"]),
+      handlePolicies(["USER","PREMIUM", "PSYCHOLOGIST"]),
       uploader.fields([{ name: "dni" }, { name: "curriculum" }]),
       uploaderDocuments
     ); //activar cuenta subiendo archivos
     this.put(
       "/update-info/:uid",
       uploader.single("imageProfile"),
-      handlePolicies(["USER", "PSYCHOLOGIST"]),
+      handlePolicies(["USER","PREMIUM","PSYCHOLOGIST"]),
       updateInfo
     );
     this.put(
