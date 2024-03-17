@@ -40,8 +40,7 @@ const dreamSchema = new mongoose.Schema({
       },
     ],
     default: []
-  },
-  quantityDreamsInterpreted: {type: String, default: 0}
+  }
 });
 mongoose.set("strictQuery",false);
 

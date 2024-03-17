@@ -1,4 +1,6 @@
 import { diaryService, dreamsService, usersService } from "../service/service.js";
+import { generateToken } from "../utils.js";
+import {SIGNED_COOKIE_NAME} from "../config/config.js"
 
 export const createDream = async (req, res) => {
   try {
@@ -194,34 +196,51 @@ export const requestInterpretationDream= async(req,res) => {
         const user = req.user.tokenInfo;
         if (!user) res.unauthorized("No autorizado. Inicie sesión.");
         if(user.status === "inactive") return res.sendRequestError("Active su cuenta enviando sus documentos de identidad.");
-        const psychologist_email= user.psychologist;
-        if(!psychologist_email) return res.sendRequestError("Seleccione un psicólogo antes de continuar.");
-        const psychologist= await usersService.getOne({email:psychologist_email});
-        if(!psychologist) return res.sendRequestError("Seleccione un psicólogo antes de continuar.");
-        const psychologist_diary_id= psychologist.diary.toString();
-        const diary = await diaryService.getById(psychologist_diary_id);
-
-        const patient= diary.diary.find(item=> item.patient.toString() === user._id);
-        // console.log(`patient: ${patient}`);
-
-        if(patient){
-         diary.diary.map(item=>{
-            if(item.patient.toString() == user._id){
-              item.dream.push({_id: dream_interpretation_id});
-            }
-          })
-          await diaryService.update(psychologist_diary_id, diary);
-        }else{
-            diary.diary.push({
-              patient: user._id,
-              dreams_id: user.dreams.toString(),
-              dream:[
-                {_id:dream_interpretation_id}
-              ] 
-            });
+        
+        if(
+          (user.role === "user" && user.numberInterpretation < 1) || 
+          (user.role === "premium" && user.numberInterpretation < 10)
+        ){
+          const psychologist_email= user.psychologist;
+          if(!psychologist_email) return res.sendRequestError("Seleccione un psicólogo antes de continuar.");
+          const psychologist= await usersService.getOne({email:psychologist_email});
+          if(!psychologist) return res.sendRequestError("Seleccione un psicólogo antes de continuar.");
+          const psychologist_diary_id= psychologist.diary.toString();
+          const diary = await diaryService.getById(psychologist_diary_id);
+  
+          const patient= diary.diary.find(item=> item.patient.toString() === user._id);
+          // console.log(`patient: ${patient}`);
+  
+          if(patient){
+           diary.diary.map(item=>{
+              if(item.patient.toString() == user._id){
+                item.dream.push({_id: dream_interpretation_id});
+              }
+            })
             await diaryService.update(psychologist_diary_id, diary);
-          }
-        res.sendSuccess("Sueño enviado a su psicólogo, para la interpretación. En 48 hs recibirá respuestas.");
+          }else{
+              diary.diary.push({
+                patient: user._id,
+                dreams_id: user.dreams.toString(),
+                dream:[
+                  {_id:dream_interpretation_id}
+                ] 
+              });
+              await diaryService.update(psychologist_diary_id, diary);
+            };
+          user.numberInterpretation = user.numberInterpretation + 1;
+          await usersService.update(user._id.toString(), user);
+
+          //actualizamos token para cookie
+          const token= generateToken(req.user.tokenInfo);
+          
+          return res
+          .cookie(SIGNED_COOKIE_NAME, token, {signed:false})
+          .sendSuccess(`Sueño enviado a su psicólogo, para la interpretación. En 48 hs recibirá respuestas. 
+          Usted lleva ${user.numberInterpretation} interpretaciones por parte de nuestros psicólogos.`);
+        }else{
+          res.sendRequestError(`Usted llegó al límite de interpretaciones: ${user.numberInterpretation}.`);
+        }
     } catch (error) {
         res.sendServerError(error.message);
     }

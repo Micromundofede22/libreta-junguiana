@@ -207,6 +207,7 @@ export const changeRole = async (req, res) => {
       req.user.tokenInfo.role = "premium";
       req.user.tokenInfo.documents = user.documents;
 
+      //actualizamos token para cookie
       const userCurrent = req.user.tokenInfo;
       const token = generateToken(userCurrent);
       return res
