@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const usersSchema = new mongoose.Schema({
   first_name: { type: String, required: true },
   last_name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true,get: obfuscate },
+ 
   age: [
     {
       type: Number,
@@ -67,6 +68,21 @@ const usersSchema = new mongoose.Schema({
 {timestamps:true} //agrega dos propiedades: createdAt, updateAt.
 );
 
+//getters: traen los datos de mongodb y los modifica antes de mostrarlos (no modifica la db)
+function obfuscate(email) {
+  const separatorIndex = email.indexOf('@');
+  if (separatorIndex < 3) {
+    // 'ab@gmail.com' -> '**@gmail.com'
+    return email.slice(0, separatorIndex).replace(/./g, '*') +
+      email.slice(separatorIndex);
+  }
+  // 'test42@gmail.com' -> 'te****@gmail.com'
+  return email.slice(0, 2) +
+    email.slice(2, separatorIndex).replace(/./g, '*') +
+    email.slice(separatorIndex);
+};
+
+mongoose.set('toJSON', { getters: true }); //para q json de la respuesta pueda leer el getter
 mongoose.set("strictQuery", false);
 
 const usersModel = new mongoose.model("users", usersSchema);
